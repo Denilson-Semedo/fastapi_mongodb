@@ -1,14 +1,17 @@
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+from fastapi import FastAPI, HTTPException
+from config.database import client
 
-uri = "mongodb+srv://myAtlasDBUser:C2ceFcbQu5@myatlasclusteredu.ncpoiwa.mongodb.net/?retryWrites=true&w=majority"
+app = FastAPI(title="MongoDB FastAPI Integration", description="A simple example showing how to integrate MongoDB with FastAPI", version="0.0.1")
 
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
+@app.get("/")
+def read_root():
+    
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        return {"message": "Successfully connected to MongoDB"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+        
 
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
+
