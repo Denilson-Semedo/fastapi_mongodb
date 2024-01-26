@@ -1,9 +1,10 @@
+import datetime
 from fastapi import APIRouter, HTTPException
 from config.database import client
-from modules.costumers.models.costumers import Costumer, CostumerReturn
+from modules.costumers.models.costumers import Costumer, CostumerReturn, CostumerUpdate
 from typing import List
 
-router = APIRouter(tags=["Costumers"], prefix="/costumers")
+router = APIRouter(tags=["Costumers"], prefix="/costumers", responses={404: {"description": "Not found"}}, )
 
 @router.post("/costumer")
 def create_costumer(costumer: Costumer):
@@ -40,11 +41,29 @@ def get_costumers() -> List[CostumerReturn]:
     
 
 @router.put("/costumer/{id}")
-def update_costumer(id: str, costumer: Costumer):
+def update_costumer(id: str, costumer: CostumerUpdate):
+    
+    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    costumer.update({
+        "updated_at": updated_at
+    })
+    
     try:
         db = client.test
         collection = db.costumers
         result = collection.update_one({"_id": id}, {"$set": costumer.dict()})
         return {"message": "Costumer updated successfully", "id": id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@router.delete("/costumer/{id}")
+def delete_costumer(id: str):
+    try:
+        db = client.test
+        collection = db.costumers
+        result = collection.delete_one({"_id": id})
+        return {"message": "Costumer deleted successfully", "id": id}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
