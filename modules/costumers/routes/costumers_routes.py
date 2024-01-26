@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from config.database import client
-from modules.costumers.models.costumers import Costumer
+from modules.costumers.models.costumers import Costumer, CostumerReturn
 from typing import List
 
 router = APIRouter(tags=["Costumers"], prefix="/costumers")
@@ -18,7 +18,7 @@ def create_costumer(costumer: Costumer):
 
 
 @router.get("/costumer/{id}")
-def get_costumer(id: str) -> Costumer:
+def get_costumer(id: str) -> CostumerReturn:
     try:
         db = client.test
         collection = db.costumers
@@ -29,11 +29,22 @@ def get_costumer(id: str) -> Costumer:
 
 
 @router.get("/costumers")
-def get_costumers() -> List[Costumer]:
+def get_costumers() -> List[CostumerReturn]:
     try:
         db = client.test
         collection = db.costumers
         result = collection.find()
         return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@router.put("/costumer/{id}")
+def update_costumer(id: str, costumer: Costumer):
+    try:
+        db = client.test
+        collection = db.costumers
+        result = collection.update_one({"_id": id}, {"$set": costumer.dict()})
+        return {"message": "Costumer updated successfully", "id": id}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
