@@ -3,11 +3,12 @@ from fastapi import APIRouter, HTTPException
 from config.database import client
 from modules.costumers.models.costumers import Costumer, CostumerReturn, CostumerUpdate
 from typing import List
+from bson.objectid import ObjectId
 
 router = APIRouter(tags=["Costumers"], prefix="/costumers", responses={404: {"description": "Not found"}}, )
 
 @router.post("/costumer")
-def create_costumer(costumer: Costumer):
+async def create_costumer(costumer: Costumer):
     # Create a new costumer
     try:
         db = client.test
@@ -19,7 +20,7 @@ def create_costumer(costumer: Costumer):
 
 
 @router.get("/costumer/{id}")
-def get_costumer(id: str) -> CostumerReturn:
+async def get_costumer(id: str) -> CostumerReturn:
     try:
         db = client.test
         collection = db.costumers
@@ -30,7 +31,7 @@ def get_costumer(id: str) -> CostumerReturn:
 
 
 @router.get("/costumers")
-def get_costumers() -> List[CostumerReturn]:
+async def get_costumers() -> List[CostumerReturn]:
     try:
         db = client.test
         collection = db.costumers
@@ -41,7 +42,7 @@ def get_costumers() -> List[CostumerReturn]:
     
 
 @router.put("/costumer/{id}")
-def update_costumer(id: str, costumer: CostumerUpdate):
+async def update_costumer(id: str, costumer: CostumerUpdate):
     
     updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
@@ -59,7 +60,7 @@ def update_costumer(id: str, costumer: CostumerUpdate):
     
 
 @router.delete("/costumer/{id}")
-def delete_costumer(id: str):
+async def delete_costumer(id: str):
     try:
         db = client.test
         collection = db.costumers
